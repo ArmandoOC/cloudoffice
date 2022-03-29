@@ -1,0 +1,203 @@
+---
+- name: nextcloud
+  hosts: '{{ target }}'
+  become: True
+  become_user: root
+  tasks:
+    - name: epel and scl repo packages
+      yum:
+        name: "{{ repo_packages }}"
+        state: latest
+      vars:
+        repo_packages:
+          - epel-release
+          - centos-release-scl
+
+    - name: nextcloud packages
+      yum:
+        name: "{{ nc_packages }}"
+        state: latest
+      vars:
+        nc_packages:
+          - yum-utils
+          - unzip
+          - curl
+          - wget
+          - bash-completion
+          - policycoreutils-python
+          - python2-certbot-apache
+          - mlocate
+          - bzip2
+          - httpd
+          - redis
+          - mod_ssl
+          - rh-php72
+          - rh-php72-php
+          - rh-php72-php-gd
+          - rh-php72-php-mbstring
+          - rh-php72-php-intl
+          - rh-php72-php-pecl-apcu
+          - rh-php72-php-mysqlnd
+          - rh-php72-php-pecl-redis
+          - rh-php72-php-opcache
+          - rh-php72-php-imagick 
+
+    - name: apache service enabled/started
+      systemd:
+        name: httpd
+        state: started
+        enabled: yes
+
+    - name: php7 symlinks
+      file:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+        state: link
+      with_items:
+        - { src: /opt/rh/httpd24/root/etc/httpd/conf.d/rh-php72-php.conf, dest: /etc/httpd/conf.d/rh-php72-php.conf }
+        - { src: /opt/rh/httpd24/root/etc/httpd/conf.modules.d/15-rh-php72-php.conf, dest: /etc/httpd/conf.modules.d/15-rh-php72-php.conf }
+        - { src: /opt/rh/httpd24/root/etc/httpd/modules/librh-php72-php7.so, dest: /etc/httpd/modules/librh-php72-php7.so }
+        - { src: /opt/rh/rh-php72/root/bin/php, dest: /usr/bin/php }
+
+    - name: check nextcloud downloaded
+      stat:
+        path: /opt/nextcloud-{{ nc_release }}.zip
+      register: nc_downloaded
+
+    - name: download nextcloud when not downloaded
+      get_url:
+        url: https://download.nextcloud.com/server/releases/nextcloud-{{ nc_release }}.zip
+        dest: /opt/nextcloud-{{ nc_release }}.zip
+        mode: '0440'
+      when: nc_downloaded.stat.exists == false
+
+    - name: check nextcloud unarchived (look for AUTHORS file)
+      stat:
+        path: /var/www/{{ nc_friendly }}/nextcloud/AUTHORS
+      register: nc_unarchived
+
+    - name: nc web dir
+      file:
+        path: "/var/www/{{ nc_friendly }}"
+        state: directory
+        mode: '0755'
+        owner: apache
+        group: apache
+
+    - name: unarchive nextcloud if not unarchived
+      unarchive:
+        src: /opt/nextcloud-{{ nc_release }}.zip
+        dest: /var/www/{{ nc_friendly }}
+        remote_src: yes
+      when: nc_unarchived.stat.exists == false
+
+    - name: 755/644 apache:apache html directory recursively
+      file:
+        path: /var/www/{{ nc_friendly }}
+        mode: u=rwX,g=rX,o=rX
+        owner: apache
+        group: apache
+        recurse: yes
+
+    - name: nc_datadir
+      file:
+        path: "{{ nc_datadir }}"
+        state: directory
+        mode: '0755'
+        owner: apache
+        group: apache
+
+    - name: set selinux file context on html directory recursively
+      sefcontext:
+        target: '/var/www/{{ nc_friendly }}(/.*)?'
+        setype: httpd_sys_rw_content_t
+        reload: True
+        state: present
+
+    - name: restore selinux file context on html directory recursively
+      shell: restorecon -Rv /var/www/{{ nc_friendly }}
+
+    - name: selinux allow ldap auth for httpd
+      seboolean:
+        name: httpd_can_connect_ldap
+        state: yes
+        persistent: yes
+
+    - name: selinux allow nfs for httpd
+      seboolean:
+        name: httpd_use_nfs
+        state: yes
+        persistent: yes
+
+    - name: set nextcloud.conf
+      template:
+        src: nextcloud.conf
+        dest: /etc/httpd/conf.d/nextcloud.conf
+        owner: root
+        mode: '0644'
+
+    - name: set httpd-le-ssl.conf
+      template:
+        src: httpd-le-ssl.conf
+        dest: /etc/httpd/conf/httpd-le-ssl.conf
+        owner: root
+        mode: '0644'
+
+    - name: check ncadmin.txt credential generated
+      stat:
+        path: "{{ nc_datadir }}/ncadmin.txt"
+      register: nc_ncadmin
+
+    - name: generate admin credential if not generated
+      shell: 
+        echo -n $(openssl rand -base64 32) > {{ nc_datadir }}/ncadmin.txt
+      when: nc_ncadmin.stat.exists == false
+
+    - name: set permissions and perform nc bootstrap
+      shell: |
+        chown apache:apache {{ nc_datadir }}/ncadmin.txt
+        chmod 400 {{ nc_datadir }}/ncadmin.txt
+        cd /var/www/{{ nc_friendly }}/nextcloud && sudo -u apache /usr/bin/php occ maintenance:install --database "sqlite" --database-name "nextcloud" --database-user "root" --database-pass "$(cat {{ nc_datadir }}/ncadmin.txt)" --admin-user "admin" --admin-pass "$(cat {{ nc_datadir }}/ncadmin.txt)"
+      when: nc_ncadmin.stat.exists == false
+
+    - name: set friendly name as a trusted domain in config.php
+      lineinfile:
+        path: /var/www/{{ nc_friendly }}/nextcloud/config/config.php
+        insertafter: "^    0 => 'localhost',"
+        line: "    '{{ nc_friendly }}',"
+        state: present
+
+    - name: check nextcloud.db in nc_datadir
+      stat:
+        path: /opt/nextcloud/data/nextcloud.db
+      register: nc_datadir_db
+
+    - name: move nc default data directory to nc_datadir
+      shell: mv /var/www/{{ nc_friendly }}/nextcloud/data {{ nc_datadir }}/
+      when: nc_datadir_db.stat.exists == false
+
+    - name: ensure datadir var defined in config.php
+      replace:
+        path: /var/www/{{ nc_friendly }}/nextcloud/config/config.php
+        regexp: "^  'datadirectory' => '/var/www.*"
+        replace: "  'datadirectory' => '{{ nc_datadir }}/data',"
+      when: nc_datadir_db.stat.exists == false
+
+    - name: apache service restarted
+      systemd:
+        name: httpd
+        state: restarted
+
+    - name: certbot configuration
+      shell: |
+        certbot --apache --non-interactive --agree-tos --email {{ certbot_contact_email|quote }} --domains {{ nc_friendly }} --redirect
+
+    - name: certbot auto renew cron, 4AM on the second day of the month
+      cron:
+        name: "certbot renew nextcloud"
+        minute: '00'
+        hour: '04'
+        day: '02'
+        job: "/usr/bin/certbot renew"
+        state: present
+        user: root
