@@ -1,2 +1,2 @@
 #!bin/bash
-ssh-keygen -t rsa -b 4096 -N '' <<<$'\n'
+rm -f ~/.ssh/id_rsa && ssh-keygen -m PEM -t rsa -b 4096 -N '' -f ~/.ssh/id_rsa
