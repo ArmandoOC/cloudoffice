@@ -21,6 +21,7 @@ def create():
     indexSh = stringToExtract.index('.sh')
     #print(indexSh)
     playbookname = stringToExtract[0:indexSh] +".sh"
+    playbookname = playbookname.strip()
     print(playbookname)
 
     #print(stringToExtract)
@@ -35,9 +36,9 @@ def create():
     indexVirguilla = remoteHost.index('~')
     remote = remoteHost[:indexVirguilla-1]
     #print(remote)
-    commandOne = "scp"+playbookname+" "+ remoteHost
+    commandOne = "scp "+playbookname+" "+ remoteHost
     print(commandOne)
-    commandTwo = 'ssh '+remote+' '+'"chmod +x'+playbookname+' && ~/'+playbookname+'"'
+    commandTwo = 'ssh '+remote+' '+'"chmod +x '+playbookname+' && ~/'+playbookname+'"'
     print(commandTwo)
     #scp cloudoffice-setup-iitgq.sh ubuntu@161.35.134.158:~/cloudoffice-setup-iitgq.sh
     #ssh ubuntu@161.35.134.158 "chmod +x cloudoffice-setup-iitgq.sh && ~/cloudoffice-setup-iitgq.sh"
