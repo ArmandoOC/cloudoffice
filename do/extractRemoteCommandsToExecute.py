@@ -22,8 +22,9 @@ def create():
     #print(indexSh)
     playbookname = stringToExtract[0:indexSh] +".sh"
     playbookname = playbookname.strip()
+    print("playbookname")
     print(playbookname)
-
+    print("ENDplaybookname")
     #print(stringToExtract)
     
     indexArroba = stringToExtract.index('@')
@@ -44,7 +45,7 @@ def create():
     print(commandTwo)
     #scp cloudoffice-setup-iitgq.sh ubuntu@161.35.134.158:~/cloudoffice-setup-iitgq.sh
     #ssh ubuntu@161.35.134.158 "chmod +x cloudoffice-setup-iitgq.sh && ~/cloudoffice-setup-iitgq.sh"
-
+    #ssh root@159.203.126.42 "chmod +x cloudoffice-setup-7gg4.sh" && ~/cloudoffice-setup-7gg4.sh"
     # Closing file
     f.close() 
 
