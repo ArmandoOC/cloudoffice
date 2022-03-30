@@ -19,16 +19,22 @@ def create():
 
     stringToExtract= extract[extract.index(left)+len(left):extract.index(right)]
     indexSh = stringToExtract.index('.sh')
-    #print(indexSh)
+    print("****stringToExtract")
+    print(stringToExtract)
+    #cloudoffice-setup-7gg4d.sh root@159.203.126.42:~/cloudoffice-setup-7gg4d
+    print(indexSh)
     playbookname = stringToExtract[0:indexSh] +".sh"
     playbookname = playbookname.strip()
     print("playbookname")
     print(playbookname)
     print("ENDplaybookname")
     #print(stringToExtract)
+
+    print("****444444stringToExtract")
+    print(stringToExtract)
     
     indexArroba = stringToExtract.index('@')
-    remoteHost = stringToExtract[indexArroba:-1]
+    remoteHost = stringToExtract[indexArroba:]
     print("STARTremoteHost")
     print(remoteHost)
     print("ENDremoteHost")
