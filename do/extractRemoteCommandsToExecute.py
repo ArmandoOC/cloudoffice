@@ -40,7 +40,7 @@ def create():
     print(commandOne)
     commandTwo = 'ssh '+remote
     print(commandTwo)
-    commandThree = '"chmod +x '+playbookname+' && ~/'+playbookname+'"'
+    commandThree = 'chmod +x '+playbookname+' && ~/'+playbookname+''
     print(commandThree)
     #scp cloudoffice-setup-iitgq.sh ubuntu@161.35.134.158:~/cloudoffice-setup-iitgq.sh
     #ssh ubuntu@161.35.134.158 "chmod +x cloudoffice-setup-iitgq.sh && ~/cloudoffice-setup-iitgq.sh"
