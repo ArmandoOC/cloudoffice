@@ -38,10 +38,8 @@ def create():
     #print(remote)
     commandOne = "scp "+playbookname+" "+ remoteHost
     print(commandOne)
-    commandTwo = 'ssh '+remote
+    commandTwo = 'ssh '+remote+' '+'"chmod +x '+playbookname+' && ~/'+playbookname+'"'
     print(commandTwo)
-    commandThree = 'chmod +x '+playbookname+' && ~/'+playbookname+''
-    print(commandThree)
     #scp cloudoffice-setup-iitgq.sh ubuntu@161.35.134.158:~/cloudoffice-setup-iitgq.sh
     #ssh ubuntu@161.35.134.158 "chmod +x cloudoffice-setup-iitgq.sh && ~/cloudoffice-setup-iitgq.sh"
 
@@ -52,8 +50,6 @@ def create():
     file.write(commandOne)
     file.write("\n")
     file.write(commandTwo)
-    file.write("\n")
-    file.write(commandThree)
     file.close()
 
 def main():
