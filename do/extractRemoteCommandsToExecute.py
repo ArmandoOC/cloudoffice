@@ -36,6 +36,8 @@ def create():
     indexVirguilla = remoteHost.index('~')
     remote = remoteHost[:indexVirguilla-1]
     #print(remote)
+    commandCero = "#!bin/bash"
+    print(commandCero)
     commandOne = "scp "+playbookname+" "+ remoteHost
     print(commandOne)
     commandTwo = 'ssh '+remote+' '+'"chmod +x '+playbookname+' && ~/'+playbookname+'"'
@@ -47,6 +49,8 @@ def create():
     f.close() 
 
     file = open("executeOnremote.sh", "w")
+    file.write(commandCero)
+    file.write("\n")
     file.write(commandOne)
     file.write("\n")
     file.write(commandTwo)
