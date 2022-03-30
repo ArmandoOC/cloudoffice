@@ -29,7 +29,9 @@ def create():
     
     indexArroba = stringToExtract.index('@')
     remoteHost = stringToExtract[indexArroba:-1]
-    #print(remoteHost)
+    print("STARTremoteHost")
+    print(remoteHost)
+    print("ENDremoteHost")
     remoteHost = "root"+remoteHost+".sh"
     
     #print(remoteHost)
