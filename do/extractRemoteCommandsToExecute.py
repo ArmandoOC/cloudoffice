@@ -20,7 +20,7 @@ def create():
     stringToExtract= extract[extract.index(left)+len(left):extract.index(right)]
     indexSh = stringToExtract.index('.sh')
     #print(indexSh)
-    playbookname = stringToExtract[0:indexSh] +".sh"
+    playbookname = stringToExtract[0:indexSh+1] +".sh"
     playbookname = playbookname.strip()
     print("playbookname")
     print(playbookname)
