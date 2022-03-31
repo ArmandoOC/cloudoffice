@@ -47,10 +47,15 @@ def create():
     #print(remote)
     commandCero = "#!bin/bash"
     print(commandCero)
-    commandOne = "scp "+playbookname+" "+ remoteHost
+    print("commandOne")
+    commandOne = 'echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
     print(commandOne)
-    commandTwo = 'ssh '+remote+' '+'"chmod +x '+playbookname+' && ~/'+playbookname+'"'
+    #commandOne = "scp "+playbookname+" "+ remoteHost
+    commandTwo = "scp "+playbookname+" "+ remote+":~/"
     print(commandTwo)
+    print(remote)
+    commandThree = 'ssh '+remote+' '+'"chmod +x '+playbookname+' && ~/'+playbookname+'"'
+    print(commandThree)
     #scp cloudoffice-setup-iitgq.sh ubuntu@161.35.134.158:~/cloudoffice-setup-iitgq.sh
     #ssh ubuntu@161.35.134.158 "chmod +x cloudoffice-setup-iitgq.sh && ~/cloudoffice-setup-iitgq.sh"
     #ssh root@159.203.126.42 "chmod +x cloudoffice-setup-7gg4.sh" && ~/cloudoffice-setup-7gg4.sh"
@@ -63,6 +68,8 @@ def create():
     file.write(commandOne)
     file.write("\n")
     file.write(commandTwo)
+    file.write("\n")
+    file.write(commandThree)
     file.close()
 
 def main():
