@@ -27,6 +27,9 @@ print("\n\nResult:", Sum)
 """
 
 def create():
+    output = sp.getoutput('bash createsshkeygen.sh')
+    print(output)
+    
     with open('do.tfvars', 'r') as file:
         dict = hcl2.load(file)
         #print(dict)
@@ -90,9 +93,6 @@ def create():
         dict["duckdns_token"]=sys.argv[13]
         dict["letsencrypt_email"]=sys.argv[14]
 
-        output = sp.getoutput('bash createsshkeygen.sh')
-        print(output)
-        
         output = sp.getoutput('cat ~/.ssh/id_rsa.pub')
         print (output)
         dict["ssh_key"] = output
