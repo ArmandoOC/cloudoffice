@@ -1,7 +1,4 @@
-import hcl2
-import json
 import sys
-import os
 import subprocess as sp
 
 # total arguments
