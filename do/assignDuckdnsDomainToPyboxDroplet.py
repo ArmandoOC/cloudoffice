@@ -30,7 +30,7 @@ def create():
     duckdns_token = sys.argv[3]
 
     commandCero = 'echo url="https://www.duckdns.org/update?domains='+duckdnsPyboxDomain+'&token='+duckdns_token+'&ip=" | curl -k -o ~/duckdns/duck.log -K -'
-    if enableDuckDnsDomainToPyboxDroplet==1:
+    if enableDuckDnsDomainToPyboxDroplet==str(1):
         file = open("assignDuckdnDomainToPyboxDroplet.sh", "w")        
         file.write(commandCero)
         file.close()
