@@ -90,6 +90,9 @@ def create():
         dict["duckdns_token"]=sys.argv[13]
         dict["letsencrypt_email"]=sys.argv[14]
 
+        output = sp.getoutput('bash createsshkeygen.sh')
+        print(output)
+        
         output = sp.getoutput('cat ~/.ssh/id_rsa.pub')
         print (output)
         dict["ssh_key"] = output
@@ -99,12 +102,42 @@ def create():
         jsonFile.write(json.dumps(dict))
         jsonFile.close()  
 
+        output = sp.getoutput('terraform init')
+        print(output)
+
+        output = sp.getoutput('terraform apply --auto-approve -var-file="json_variables.tfvars.json"')
+        print(output)
+
+        output = sp.getoutput('terraform output -json > ./output.json')
+        print(output)
+
+        output = sp.getoutput('python3 extractRemoteCommandsToExecute.py')
+        print(output)
+
+        output = sp.getoutput('bash executeOnremote.sh ')
+        print(output)
+        
+        print("****************************************************************************")
+        print("****************************************************************************")
+        print("****************************************************************************")
+        print("Please wait 5 minutes aprox and then enter to yourdomain/nc in your browser.")
+        print("****************************************************************************")
+        print("****************************************************************************")
+        print("****************************************************************************")
+
 def main():
     n = len(sys.argv)
     print("Total arguments passed:", n)
     if n!=15:
         print("Please enter all the parameters")
     else:
+        print("****************************************************************************")
+        print("****************************************************************************")
+        print("****************************************************************************")
+        print("Hello.. please wait")
+        print("****************************************************************************")
+        print("****************************************************************************")
+        print("****************************************************************************")
         create()
 if __name__ == "__main__":
     main()
