@@ -499,7 +499,7 @@
 
     - name: external storage script (set)
       lineinfile:
-        path: "{{ project_directory }}/nextcloud_application/nextPyBoxTechMed.sh"
+        path: "{{ project_directory }}/nextcloud_application/nextcloud-storage.sh"
         create: yes
         owner: root
         group: root
@@ -511,12 +511,12 @@
         - "docker exec --user www-data cloudoffice_nextcloud php occ app:install files_external"
         - "docker exec --user www-data cloudoffice_nextcloud php occ app:enable files_external"
         - "# check bucket against existing storage"
-        - "docker exec --user www-data cloudoffice_nextcloud php occ files_external:list | grep --quiet 'PyBoxTechMed'"
+        - "docker exec --user www-data cloudoffice_nextcloud php occ files_external:list | grep --quiet 'cloud-storage'"
         - "# if doesn't exist, create"
         - "if [ $? -ne 0 ]"
         - "then"
-        - "  docker exec --user www-data cloudoffice_nextcloud php occ files_external:create -c bucket={{ nc_prefix }}-storage-container-data -c hostname={{ docker_storagegw }} -c port=9000 -c use_ssl=false -c use_path_style=true -c key={{ az_storage_account_name }} -c secret={{ az_storage_key.secrets[0].secret }} PyBoxTechMed amazons3 amazons3::accesskey"
-        - "  STORAGE_ID=$(docker exec --user www-data cloudoffice_nextcloud php occ files_external:list | awk '/PyBoxTechMed/ {a=$2}END{print a}')"
+        - "  docker exec --user www-data cloudoffice_nextcloud php occ files_external:create -c bucket={{ nc_prefix }}-storage-container-data -c hostname={{ docker_storagegw }} -c port=9000 -c use_ssl=false -c use_path_style=true -c key={{ az_storage_account_name }} -c secret={{ az_storage_key.secrets[0].secret }} cloud-storage amazons3 amazons3::accesskey"
+        - "  STORAGE_ID=$(docker exec --user www-data cloudoffice_nextcloud php occ files_external:list | awk '/cloud-storage/ {a=$2}END{print a}')"
         - "  docker exec --user www-data cloudoffice_nextcloud php occ files_external:option $STORAGE_ID enable_sharing true"
         - "else"
         - "  echo 'cloud storage exists, skipping.'"
